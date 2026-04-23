@@ -1,0 +1,166 @@
+{
+  "name": "Form to Notion + Notification",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tally-leads",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "135a1c0d-0ba8-4738-bb2b-46fb2ca77961",
+      "name": "Webhook",
+      "webhookId": "4b1ad040-58aa-43b0-bf4a-777a4d978d72"
+    },
+    {
+      "parameters": {
+        "chatId": "-1003764865065",
+        "text": "=🔔 New Lead Received!  \n\n👤 Name     : {{ $json.name }} \n📧 Email    : {{ $json.email }} \n🏢 Company  : {{ $json.company }} \n🛠 Service  : {{ $json.service }} \n💬 Message  : {{ $json.message }}  \n\nCheck Notion for full details.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        176
+      ],
+      "id": "90887b1d-ddac-42a2-868d-97f4879308e2",
+      "name": "Send a text message",
+      "webhookId": "cd708dfb-f08c-447f-b2b3-aa93aba3dd3c",
+      "credentials": {
+        "telegramApi": {
+          "id": "0xGj13wxaYd1MaMK",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "349500f4-b86a-80bf-a8c5-ea649642433c",
+          "mode": "list",
+          "cachedResultName": "Client Leads",
+          "cachedResultUrl": "https://www.notion.so/349500f4b86a80bfa8c5ea649642433c"
+        },
+        "simple": false,
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Name|title",
+              "title": "={{ $json.name }}"
+            },
+            {
+              "key": "Email|email",
+              "emailValue": "={{ $json.email }}"
+            },
+            {
+              "key": "Company|rich_text",
+              "textContent": "={{ $json.company }}"
+            },
+            {
+              "key": "Service Needed|select",
+              "selectValue": "={{ $json.service }}"
+            },
+            {
+              "key": "Message|rich_text",
+              "textContent": "={{ $json.message }}"
+            },
+            {
+              "key": "Status|select",
+              "selectValue": "=new"
+            },
+            {
+              "key": "Submitted At|date",
+              "date": "={{ $json.submitted_at }}",
+              "timezone": "Asia/Jakarta"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "6494a3c8-dc1a-4fda-a73e-fdbf44972c25",
+      "name": "Create a database page",
+      "credentials": {
+        "notionApi": {
+          "id": "uhROPW6H0yyO8GnR",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const fields = $input.first().json.body.data.fields;\n\nconst name = fields[0].value;\nconst email = fields[1].value;\nconst company = fields[2].value;\nconst message = fields[4].value;\n\n// Match dropdown ID to text\nconst dropdownField = fields[3];\nconst selectedId = dropdownField.value[0];\nconst selectedOption = dropdownField.options.find(o => o.id === selectedId);\nconst service = selectedOption ? selectedOption.text : 'Unknown';\n\nreturn [{\n  json: {\n    name,\n    email,\n    company,\n    service,\n    message,\n    submitted_at: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "8c237b61-fa29-4715-8684-a10bc06a3525",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a database page": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Create a database page",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ff171024-6edf-4c8c-a0e8-69942efe6e57",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ab4da710a8e5e399600a494b56823a58c73a4cfb4b7d4aa1a9b2cd8cfec75e18"
+  },
+  "id": "juMG902aChOyMJag",
+  "tags": []
+}
