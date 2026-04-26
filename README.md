@@ -36,3 +36,6 @@ and organize client inquiries without manual copy-pasting.
 - Zero leads lost — every submission captured automatically
 - Business owner notified within seconds of submission
 - Clean Notion database for tracking lead status
+
+## Additional Features
+- Automatic error monitoring with Telegram alerts
